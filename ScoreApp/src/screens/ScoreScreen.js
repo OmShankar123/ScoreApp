@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, FlatList } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, FlatList,Image } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import NetInfo from '@react-native-community/netinfo';
+import Modal from "react-native-modal"
+// import { Ionicons } from '@expo/vector-icons';
+
 
 const MAX_SCORES = 5;
 const SCORES_KEY = 'scores';
@@ -9,9 +12,10 @@ const SCORES_KEY = 'scores';
 const ScoreScreen = () => {
   const [score, setScore] = useState('');
   const [scores, setScores] = useState([]);
-
+  const [modalVisible, setModalVisible] = useState(false);
   // Check network connectivity
   const [isConnected, setIsConnected] = useState(true);
+
   const handleConnectivityChange = (isConnected) => {
     setIsConnected(isConnected);
   };
@@ -55,21 +59,25 @@ const ScoreScreen = () => {
     }
   };
 
-  const renderItem = ({ item }) => (
-
-    <View style={styles.scoreView}>
-      <Text style={styles.score}>{item}</Text>
-    </View>
-
-  );
+  const toggleModal = () => {
+    setModalVisible(!modalVisible);
+  };
 
   return (
     <View style={styles.container}>
+      <View style={styles.navView}> 
+         <TouchableOpacity style={styles.modalButton} onPress={toggleModal}>
+        {/* <Ionicons name="ios-menu" size={32} color="white" /> */}
+        {/* <Text>Button</Text> */}
+        <Image style={styles.modalButton}
+        source={require('../assests/Images/menu.png')}/>
+      </TouchableOpacity></View>
+    
       <Text style={styles.title}>Enter score:</Text>
       <View style={styles.inputView}>
-        <TextInput 
-        keyboardType='number-pad'
-        style={styles.inputText} value={score} onChangeText={setScore} />
+        <TextInput
+          keyboardType='number-pad'
+          style={styles.inputText} value={score} onChangeText={setScore} />
       </View>
       <TouchableOpacity style={styles.saveBtn} onPress={saveScore}>
         <Text style={styles.saveText}>SAVE</Text>
@@ -80,7 +88,23 @@ const ScoreScreen = () => {
           <View style={styles.scoresTitleView}>
             <Text style={styles.scoresTitle}>Max {MAX_SCORES} Scores:</Text>
           </View>
-          <FlatList
+
+
+         
+
+
+
+
+          <View style={styles.modalView}>
+          <Modal visible={modalVisible} 
+          onBackdropPress={()=>setModalVisible(false)}
+          transparent={true}
+          animationType="slide">
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Your Scores:</Text>
+              <FlatList
+              showsHorizontalScrollIndicator={false}
+              showsVerticalScrollIndicator={false}
             data={scores}
             renderItem={({ item }) => (
               <View style={styles.scoreItem}>
@@ -90,7 +114,14 @@ const ScoreScreen = () => {
             keyExtractor={(item, index) => index.toString()}
             style={styles.scoreList}
             contentContainerStyle={styles.flatListContentContainer}
-          />
+              />
+              <TouchableOpacity style={styles.modalCloseButton} onPress={toggleModal}>
+                <Text style={styles.modalCloseButtonText}>CLOSE</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
+          </View>
+
 
         </View>
       )}
@@ -104,14 +135,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#222222',
+   
     alignItems: 'center',
-    justifyContent: 'center',
+    // justifyContent: 'center',
+  },
+  navView:{
+    backgroundColor:'#FFA500',
+    width:'100%',
+    height:'10%',
+    justifyContent:'center',
+    //  alignItems:'center'
+  },
+  modalButton:{
+  //  backgroundColor:'red',
+    width:'30%',
+    height:'75%',
+    justifyContent:'center',
+    //  alignItems:'center',
+    marginLeft:8
+
+
   },
   title: {
     fontWeight: 'bold',
     fontSize: 50,
     color: '#ffffff',
     marginBottom: 40,
+    marginTop:20
   },
   inputView: {
     width: '80%',
@@ -137,19 +187,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   scoresContainer: {
-    marginTop: 20,
+    // marginTop: 20,
 
-    alignItems: 'center',
-    justifyContent: 'center',
-    // flexDirection:'row',
+    // alignItems: 'center',
+    // justifyContent: 'center',
+    //  flexDirection:'row',
     // backgroundColor: 'red',
-    height: '30%',
-    width: '50%'
+     height: '10%',
+    // width: '50%'
   },
   scoresTitleView: {
-    // backgroundColor: "purple",
+    //  backgroundColor: "purple",
     justifyContent: 'center',
-    height: '20%',
+    height: '100%',
     width: '100%',
     alignItems: 'center'
   },
@@ -185,12 +235,12 @@ const styles = StyleSheet.create({
   offlineText: {
     color: 'red',
     // backgroundColor:'red'
-    marginTop:10
+    marginTop: 10
 
   },
   scoreList: {
     marginTop: 20,
-    width:'50%',
+    width: '50%',
     // marginBottom:20
     // justifyContent:'space-evenly'
     //alignItems:'center'
@@ -199,27 +249,62 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 3,
     borderBottomColor: '#ccc',
-    borderRightWidth:1,
-    borderRightColor:'#ccc',
-    borderLeftWidth:1,
-    borderLeftColor:'#ccc',
-    justifyContent:'center',
-    alignItems:'center',
-    marginBottom:10,
-    borderRadius:25
-    
+    borderRightWidth: 1,
+    borderRightColor: '#ccc',
+    borderLeftWidth: 1,
+    borderLeftColor: '#ccc',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
+    borderRadius: 25
+
   },
   scoreText: {
     fontSize: 18,
   },
-  flatListContentContainer:{
+  flatListContentContainer: {
     // justifyContent:'center',
     // alignItems:'stretch',
     // flexDirection:'row-reverse'
-    
+
+  },
+  modalView:{
+// flex:1,
+backgroundColor:'red',
+justifyContent:'center',
+width:'100%',
+// marginTop:30
+alignContent:'center',
+alignItems:'center',
+// height:'100%'
+  },
+  modalContainer:{
+    // flex:1,
+     height:'50%',
+    //marginTop:'90%',
+    backgroundColor:'#FFA500',
+    // justifyContent:'center',
+    alignItems:'center',
+    borderRadius:50,
+    // borderRadius:2,
+    borderTopColor:'red',
+    width:'100%',
+    // marginLeft:"50%"
+    alignContent:'center'
+
+  },
+  modalTitle:{
+    fontSize: 18,
+    color: '#fff',
+    // marginBottom: 10,
+    alignContent: 'center',
+    alignItems: 'center'
+  },
+  modalCloseButtonText:{
+    color:'red'
   }
 });
-export default ScoreScreen; 
+export default ScoreScreen;
 
 
 
